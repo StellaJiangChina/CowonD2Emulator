@@ -70,7 +70,7 @@ ULONG  *nfc_rst;
 UCHAR  nfc_addr_arr[8], nfc_dind, nfc_aind, nfc_anum;
 UINT64 nfc_addr, nfc_sadd;
 
-unsigned int  nfc_id[5] = { 0xEC,0xD7,0x55,0xB6,0x78 };
+unsigned int  nfc_id[5] = { 0xEC,0xD5,0x14,0xB6,0x74 };
 unsigned int  resp70[2] = { 0x40,0x40 };
 unsigned int  nfc_indx_snap;
 unsigned int  nfc_cmnd_snap;
@@ -168,10 +168,10 @@ void dump_snap_and_reinit(ULONG val)
   if(offfile && nfc_indx_snap)
   {
     fprintf(offfile, "%6x %4x %08x ", nfc_indx_snap, nfc_cmnd_snap, nfc_ctrl_snap);
-    lval = (ULONG)(nfc_sadd / 0x840);
+    lval = (ULONG)(nfc_sadd / 0x1080);
     for(i=0; i<3; i++)  fprintf(offfile, "%02x", (lval >> (16-8*i)) & 0xff);
     fprintf(offfile, "-");
-    lval = (ULONG)(nfc_sadd % 0x840);
+    lval = (ULONG)(nfc_sadd % 0x1080);
     for(i=0; i<2; i++)  fprintf(offfile, "%02x", (lval >>  (8-8*i)) & 0xff);
     fprintf(offfile, " %05x %s ", nfc_dcnt_snap, type[nfc_type_snap]);
     for(i=0; i<nfc_dcnt_snap && i<20; i+=4)
@@ -194,7 +194,7 @@ void emu_nand_nfc(ULONG des, ULONG *ptr, ULONG typ, ULONG val)
   {
     FILE *fil = NULL;//fopen("wrdata.bin", "rb");
     /* format of this flash binary: n x (8 x (512+32)) of physical sector data */
-    partition = _open("D:\\test11.bin", _O_RDONLY);
+    partition = _open("D:\\nand_perfect.bin", _O_RDONLY);
 
     if(fil != NULL)
     { fread(&wrnum, sizeof(wrnum), 1, fil);
@@ -244,8 +244,8 @@ void emu_nand_nfc(ULONG des, ULONG *ptr, ULONG typ, ULONG val)
                                    {
                                    case 0xf1: case 0xf2: case 0xff:       break;
                                    case 0x90: nfc_sadd = nfc_addr_arr[0]; break;
-                                   case 0x60: nfc_sadd = *(ULONG*)&nfc_addr_arr[0] * 0x840; break;
-                                   default:   nfc_sadd = *(USHORT*)&nfc_addr_arr[0] + (UINT64)*(ULONG*)&nfc_addr_arr[2] * 0x840; break;
+                                   case 0x60: nfc_sadd = *(ULONG*)&nfc_addr_arr[0] * 0x1080; break;
+                                   default:   nfc_sadd = *(USHORT*)&nfc_addr_arr[0] + (UINT64)*(ULONG*)&nfc_addr_arr[2] * 0x1080; break;
                                    }
                                    nfc_addr = nfc_sadd;
                                  }
