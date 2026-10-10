@@ -118,13 +118,13 @@ struct nand_info
     unsigned char     planes;
 };
 /*                            id,  id2, pages,blocks,psize,spare,col,row,planes */
-struct nand_info nd_info = {0xD7, 0x55,  128, 8192,  4096,  128,  2,  3,   4 }; /* K9LBG08UOM */
+struct nand_info nd_info = {0xD5, 0x14,  128, 4096,  4096,  128,  2,  3,   2 }; /* K9GAG08UOM */
 static struct nand_info* nand_data = &nd_info;
 /*
-     8192blocks  with 128pages  with 4096Bytes
-        8192         128            4096
+     4096blocks  with 128pages  with 4096Bytes, 2 planes
+        4096         128            4096
 size = blocks * pages_per_block * page_size;
-page   0...1048575
+page   0...524287
 offset 0...4095
 
 */
@@ -462,11 +462,11 @@ int nand_init(void)
     NAND_GPIO_OUT_EN(CS_GPIO_BIT | WE_GPIO_BIT);
 
     /* Get chip characteristics and number of banks */
-    segments_per_bank   =    2048; //->blocks_per_bank / ->planes;
-    bytes_per_segment   = 2097152; //->page_size * ->pages_per_block * ->planes;
+    segments_per_bank   =    2048; //->blocks_per_bank / ->planes;  (4096/2)
+    bytes_per_segment   = 1048576; //->page_size * ->pages_per_block * ->planes; (4096*128*2)
     sectors_per_page    =       8; //->page_size / SECTOR_SIZE;
-    sectors_per_segment =    4096; // bytes_per_segment / SECTOR_SIZE;
-    pages_per_segment   =     512; // sectors_per_segment  / sectors_per_page;
+    sectors_per_segment =    2048; // bytes_per_segment / SECTOR_SIZE;
+    pages_per_segment   =     256; // sectors_per_segment  / sectors_per_page;
     total_banks         =       1;
 
     /* Use chip info to allocate the correct size LPT buffer */
