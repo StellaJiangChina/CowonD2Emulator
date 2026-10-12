@@ -194,7 +194,7 @@ void emu_nand_nfc(ULONG des, ULONG *ptr, ULONG typ, ULONG val)
   {
     FILE *fil = NULL;//fopen("wrdata.bin", "rb");
     /* format of this flash binary: n x (8 x (512+32)) of physical sector data */
-    partition = _open("D:\\nand_perfect.bin", _O_RDONLY);
+    partition = _open("nand_perfect.bin", _O_RDONLY);
 
     if(fil != NULL)
     { fread(&wrnum, sizeof(wrnum), 1, fil);
@@ -778,15 +778,17 @@ int last_instr_moved_pc(CORE *c)
 ******************** exception vector table *********************/
 void trigger_interrupts(CORE *c)
 {
-  if(tim1 == 0 && (*c->int_en & TIMER0_IRQ_MASK))
-  { c->int_pending = 1 << (*vn_irq = 6); *m_irq = 0x40;
-    *va_irq = 6 << 2;
-    *tim_req = 0x101;
+  if(tim1 == 0 && c->int_en && (*c->int_en & TIMER0_IRQ_MASK))
+  { if(vn_irq)  c->int_pending = 1 << (*vn_irq = 6);
+    if(m_irq)   *m_irq  = 0x40;
+    if(va_irq)  *va_irq = 6 << 2;
+    if(tim_req) *tim_req = 0x101;
   }
-  if(tim2 == 0 && (*c->int_en & TIMER0_IRQ_MASK))
-  { c->int_pending = 1 << (*vn_irq = 6); *m_irq = 0x40;
-    *va_irq = 6 << 2;
-    *tim_req = 0x404;
+  if(tim2 == 0 && c->int_en && (*c->int_en & TIMER0_IRQ_MASK))
+  { if(vn_irq)  c->int_pending = 1 << (*vn_irq = 6);
+    if(m_irq)   *m_irq  = 0x40;
+    if(va_irq)  *va_irq = 6 << 2;
+    if(tim_req) *tim_req = 0x404;
   }
 
   if(c->rg[15] == c->irq_return && last_instr_moved_pc(c)) // just returned from interrupt?
@@ -878,12 +880,12 @@ DWORD WINAPI RunCode(void *pRun)
   int   j;
   ULONG iend, sz, ret, op, usec=0;
 //char  name[64], *executable = "eeprom.bin";
-  char  name[64], *executable = "D:\\d2.bin";
+  char  name[64], *executable = "d2.bin";
 //char  name[64], *executable = "C:\\work\\cowond2\\rockbox.bin";
   char            *mapfile    = "cowond2_orig.map"; //"sansa.map";
   int   evt_trigger = 1;
 
-  load_eeprom("D:\\eeprom.bin");
+  load_eeprom("eeprom.bin");
   init_asm_buffer(asmbuf+0, "disassembly_cpu.txt");
 
   cpu.irq_return = MAGIC;
@@ -917,7 +919,7 @@ DWORD WINAPI RunCode(void *pRun)
 
   for(iii=0; *(DWORD*)pRun && iii<iend; iii++)
   {
-    if(++usec >= NUMINSTR_PER_USEC) { usec = 0;  (*usec_timer)++; }
+    if(++usec >= NUMINSTR_PER_USEC) { usec = 0;  if(usec_timer) (*usec_timer)++; }
     if(++tim1 >= timer1_limit)        tim1 = 0;
     if(++tim2 >= timer2_limit)        tim2 = 0;
 
